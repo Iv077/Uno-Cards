@@ -1,5 +1,8 @@
 import cv2
 import numpy as np
+import pickle
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 colour_list = ['b', 'r', 'g', 'y']
 number_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'R', 'S', 'T']
@@ -33,19 +36,26 @@ for x in range(len(comb_list)):
     data.remove(max(data, key=lambda x: x[1]))     # removing the biggest contour found, in our case the border of the uno card
     BigCon = (max(data, key=lambda x: x[1]))    # with the same code we print the new biggest countour found, that is the number, letters or shapes that helps to identify the specific card
     dataB.append(BigCon)
-    tar = [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 'R', 'R', 'R', 'R', 'S', 'S', 'S', 'S', 'T', 'T', 'T', 'T']
-    t = np.array(tar)
+    target = [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 'R', 'R', 'R', 'R', 'S', 'S', 'S', 'S', 'T', 'T', 'T', 'T']
+    t = np.array(target)
 print(np.array(dataB))
 print(t)
 
-d = dataB
-#t = tar
+#-------------------------------------------------------------------------------
 
-# taking the first 60% of each class for training, and the rest 40% for testing
-d_train = np.concatenate((d[:3,:], d[4:7,:], d[8:11,:], d[12:15,:], d[16:19,:], d[20:23,:], d[24:27,:], d[28:31,:], d[32:35,:], d[36:39,:], d[40:43,:], d[44:47,:], d[48:51,:]))
-d_test = np.concatenate((d[3:4,:], d[7:8,:], d[11:12,:], d[15:16,:], d[19:20,:], d[23:24,:], d[27:28,:], d[31:32,:], d[35:36,:], d[39:40,:], d[43:44,:], d[47:48,:], d[51:,:]))
-t_train = np.concatenate((t[:3], t[4:7], t[8:11], t[12:15], t[16:19], t[20:23], t[24:27], t[28:31], t[32:35], t[36:39], t[40:43], t[44:47], t[48:51]))
-t_test = np.concatenate((t[3:4], t[7:8], t[11:12], t[15:16], t[19:20], t[23:24], t[27:28], t[31:32], t[35:36], t[39:40], t[43:44], t[47:48], t[51:]))
+d = np.array(dataB)
+t = target
+# taking the first 50% of each class for training, and the rest 50% for testing
+d_train = np.concatenate((d[:2,:], d[4:6,:], d[8:10,:], d[12:14,:], d[16:18,:], d[20:22,:], d[24:26,:], d[28:30,:], d[32:34,:], d[36:38,:], d[40:42,:], d[44:46,:], d[48:50,:]))
+d_test = np.concatenate((d[2:4,:], d[6:8,:], d[10:12,:], d[14:16,:], d[18:20,:], d[22:24,:], d[26:28,:], d[30:32,:], d[34:36,:], d[38:40,:], d[42:44,:], d[46:48,:], d[50:,:]))
+t_train = np.concatenate((t[:2], t[4:6], t[8:10], t[12:14], t[16:18], t[20:22], t[24:26], t[28:30], t[32:34], t[36:38], t[40:42], t[44:46], t[48:50]))
+t_test = np.concatenate((t[2:4], t[6:8], t[10:12], t[14:16], t[18:20], t[22:24], t[26:28], t[30:32], t[34:36], t[38:40], t[42:44], t[46:48], t[50:]))
+
+# taking the first 75% of each class for training, and the rest 25% for testing
+#d_train = np.concatenate((d[:3,:], d[4:7,:], d[8:11,:], d[12:15,:], d[16:19,:], d[20:23,:], d[24:27,:], d[28:31,:], d[32:35,:], d[36:39,:], d[40:43,:], d[44:47,:], d[48:51,:]))
+#d_test = np.concatenate((d[3:4,:], d[7:8,:], d[11:12,:], d[15:16,:], d[19:20,:], d[23:24,:], d[27:28,:], d[31:32,:], d[35:36,:], d[39:40,:], d[43:44,:], d[47:48,:], d[51:,:]))
+#t_train = np.concatenate((t[:3], t[4:7], t[8:11], t[12:15], t[16:19], t[20:23], t[24:27], t[28:31], t[32:35], t[36:39], t[40:43], t[44:47], t[48:51]))
+#t_test = np.concatenate((t[3:4], t[7:8], t[11:12], t[15:16], t[19:20], t[23:24], t[27:28], t[31:32], t[35:36], t[39:40], t[43:44], t[47:48], t[51:]))
 
 print(np.shape(d_train), np.shape(d_test), len(t_train), len(t_test))
 
@@ -54,4 +64,13 @@ print(d_test)
 print(t_train)
 print(t_test)
 
+#-------------------------------------------------------------------------------
 
+clf = SVC(kernel="linear", C=0.025)
+d_train, d_test, t_train, t_test = train_test_split(d, t, test_size=.5)#, random_state=42)
+clf.fit(d_train, t_train)
+pickle.dump(classifier, open("Uno_ML.p", "wb"))    # save the model after training, remember the file name
+
+
+#score = clf.score(d_test, t_test) # predict and calculate the classification accuracy
+#print(score*100, '%')
