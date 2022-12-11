@@ -41,7 +41,7 @@ for x in range(len(comb_list)):
 #-------------------------------------------------------------------------------------------
 
     img_gray = cv2.cvtColor(img_crop, cv2.COLOR_BGR2GRAY)   # convert to B/W
-    img_sm = cv2.blur(img, (5, 5))           # smoothing
+    img_blur = cv2.GaussianBlur(img, (7,7),1)
     thr_value, img_th = cv2.threshold(img_gray, 200, 255, cv2.THRESH_BINARY)
     kernel = np.ones((5, 5), np.uint8)
     img_close = cv2.morphologyEx(img_th, cv2.MORPH_OPEN, kernel)      # morphology correction
@@ -55,8 +55,6 @@ for x in range(len(comb_list)):
         perimeter = cv2.arcLength(c, True)      # perimeter of contour c (curved length)
         epsilon = 0.02*perimeter    # parameter of polygon approximation: smaller values provide more vertices
         vertex_approx = len(cv2.approxPolyDP(c, epsilon, True))     # approximate with polygon
-        cv2.drawContours(img_crop, [c], 0, (0, 255, 0), 3)   # paint contour c
-        cv2.putText(img_crop, str(i), (c[0, 0, 0]+20, c[0, 0, 1]+30), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 255))    # identify contour c
         [x,y,w,h] = cv2.boundingRect(c)
         cv2.rectangle(img_crop, (x,y), (x+w,y+h), (255, 0, 0), 2)
         sample = [length, perimeter, vertex_approx]
@@ -85,11 +83,3 @@ for i in range(len(t_test)):
     
 filename = 'Uno_Classifier.sav'
 joblib.dump(clf, filename)
-
-
-
-
-
-
-
-
